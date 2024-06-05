@@ -28,12 +28,12 @@ runcmd:
   - echo "apt-get install -y docker.io" >> /home/fill/post-setup.sh
   - echo "npm install -g create-react-app" >> /home/fill/post-setup.sh
   - echo "create-react-app my-react-app" >> /home/fill/post-setup.sh
+  - echo "systemctl start openvpn@test-react" >> /home/fill/post-setup.sh
+  - echo "systemctl enable openvpn@test-react" >> /home/fill/post-setup.sh
   - chmod +x /home/fill/post-setup.sh
-  - /home/fill/post-setup.sh
-  - systemctl start openvpn@test-react
-  - systemctl enable openvpn@test-react
+  - /home/fill/post-setup.sh | tee /home/fill/post-setup.log
 write_files:
-  - path: /etc/openvpn/test-react.ovpn
+  - path: /etc/openvpn/test-react.conf
     permissions: '0644'
     owner: root:root
     content: |
