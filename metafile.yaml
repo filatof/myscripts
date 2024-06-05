@@ -19,10 +19,13 @@ packages:
 runcmd:
   - systemctl start nginx
   - systemctl enable nginx
-  - echo "Running post-setup script" > /home/fill/post-setup.sh
+  - echo "# Running post-setup script" > /home/fill/post-setup.sh
   - echo "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash" >> /home/fill/post-setup.sh
-  - echo "export NVM_DIR=\"$HOME/.nvm\"" >> /home/fill/post-setup.sh
-  - echo "[ -s \"$NVM_DIR/nvm.sh\" ] && \. \"$NVM_DIR/nvm.sh\"" >> /home/fill/post-setup.sh
+  - echo "export NVM_DIR=\"\$HOME/.nvm\"" >> /home/fill/post-setup.sh
+  - echo "[ -s \"\$NVM_DIR/nvm.sh\" ] && \. \"\$NVM_DIR/nvm.sh\"" >> /home/fill/post-setup.sh
+  - echo "echo 'export NVM_DIR=\"\$HOME/.nvm\"' >> /home/fill/.bashrc" >> /home/fill/post-setup.sh
+  - echo "echo '[ -s \"\$NVM_DIR/nvm.sh\" ] && \. \"\$NVM_DIR/nvm.sh\"' >> /home/fill/.bashrc" >> /home/fill/post-setup.sh
+  - echo "source /home/fill/.bashrc" >> /home/fill/post-setup.sh
   - echo "nvm install node" >> /home/fill/post-setup.sh
   - echo "apt-get update" >> /home/fill/post-setup.sh
   - echo "apt-get install -y docker.io" >> /home/fill/post-setup.sh
