@@ -1,7 +1,7 @@
 META=$1
 yc compute instance create \
-  --name react \
-  --hostname  react \
+  --name module4 \
+  --hostname  module4 \
   --zone ru-central1-a \
   --network-interface subnet-name=pub-subnet,nat-ip-version=ipv4 \
   --preemptible \

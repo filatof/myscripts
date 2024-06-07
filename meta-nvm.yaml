@@ -1,0 +1,113 @@
+#cloud-config
+datasource:
+  Ec2:
+    strict_id: false
+ssh_pwauth: no
+users:
+ - name: fill
+   sudo: 'ALL=(ALL) NOPASSWD:ALL'
+   shell: /bin/bash
+   ssh_authorized_keys:
+   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIClYHWXZAqPK6vWZFHSQ+Wd78C7nlRj5OvW2nyEDdtHD fill@ubntuserver
+   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL+O6cXczlSLnL0wZSMe6qRNKpfbdiG6BtYwCmvi5ctR fill@Macmini.local
+   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOlPFhFwKepToM3D/5wgUfFsPsv99sZkfUr9gnuhYYr/ fill@MacBookAir.local
+packages:
+  - nginx
+  - openvpn
+  - git
+  - curl
+runcmd:
+  - systemctl start nginx
+  - systemctl enable nginx
+  - echo "# Running post-setup script" > /home/fill/post-setup.sh
+  - echo "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash" >> /home/fill/post-setup.sh
+  - echo "export NVM_DIR=\"/home/fill/.nvm\"" >> /home/fill/post-setup.sh
+  - echo "[ -s \"/home/fill/.nvm/nvm.sh\" ] && \. \"/home/fill/.nvm/nvm.sh\"" >> /home/fill/post-setup.sh
+  - echo "echo 'export NVM_DIR=\"/home/fill/.nvm\"' >> /home/fill/.bashrc" >> /home/fill/post-setup.sh
+  - echo "echo '[ -s \"/home/fill/.nvm/nvm.sh\" ] && \. \"/home/fill/.nvm/nvm.sh\"' >> /home/fill/.bashrc" >> /home/fill/post-setup.sh
+  - echo "source /home/fill/.bashrc" >> /home/fill/post-setup.sh
+  - echo "nvm install node" >> /home/fill/post-setup.sh
+  - echo "apt-get update" >> /home/fill/post-setup.sh
+  - echo "apt-get install -y docker.io" >> /home/fill/post-setup.sh
+  - echo "npm install -g create-react-app" >> /home/fill/post-setup.sh
+  - echo "create-react-app my-react-app" >> /home/fill/post-setup.sh
+  #- echo "systemctl start openvpn@test-react" >> /home/fill/post-setup.sh
+  #- echo "systemctl enable openvpn@test-react" >> /home/fill/post-setup.sh
+  - chmod +x /home/fill/post-setup.sh
+  - su - fill -c "/home/fill/post-setup.sh | tee /home/fill/post-setup.log"
+write_files:
+  - path: /etc/openvpn/test-react.conf
+    permissions: '0644'
+    owner: root:root
+    content: |
+      client
+      dev tun
+      proto udp
+      remote 95.164.47.20 1194
+      resolv-retry infinite
+      nobind
+      remote-cert-tls server
+      tls-version-min 1.2
+      verify-x509-name debserv_d657c86a-7f44-4132-b168-99de91586abc name
+      cipher AES-256-CBC
+      auth SHA256
+      auth-nocache
+      verb 3
+      <ca>
+      -----BEGIN CERTIFICATE-----
+      MIIBwDCCAWWgAwIBAgIUCpteHRgLAGRDQlq2mONZdCJOvgAwCgYIKoZIzj0EAwIw
+      FjEUMBIGA1UEAwwLRWFzeS1SU0EgQ0EwHhcNMjQwNTIzMTkzMjExWhcNMzQwNTIx
+      MTkzMjExWjAWMRQwEgYDVQQDDAtFYXN5LVJTQSBDQTBZMBMGByqGSM49AgEGCCqG
+      SM49AwEHA0IABIGQ5fddItLu0CcrJXbJk4rPmLklzmiC+YrwxXHAqjPmOSq4Uryn
+      yzR/4DhMnD0QVjiU/iDDioG90WenkpM11LijgZAwgY0wDAYDVR0TBAUwAwEB/zAd
+      BgNVHQ4EFgQUS5YasWjbs0NB1P5+ZWppjlxIyxIwUQYDVR0jBEowSIAUS5YasWjb
+      s0NB1P5+ZWppjlxIyxKhGqQYMBYxFDASBgNVBAMMC0Vhc3ktUlNBIENBghQKm14d
+      GAsAZENCWraY41l0Ik6+ADALBgNVHQ8EBAMCAQYwCgYIKoZIzj0EAwIDSQAwRgIh
+      AKE8PDw9dwNh8BwjbBtLklPl70GJ+7S60vXK9AD7FTMlAiEAy7foOy3Yhccn7B+N
+      WBv6P12L+BY0nuEOG0bg85/N2jU=
+      -----END CERTIFICATE-----
+      </ca>
+      <cert>
+      -----BEGIN CERTIFICATE-----
+      MIIBzTCCAXKgAwIBAgIQR/jwPNmwykcRj+rTvncxajAKBggqhkjOPQQDAjAWMRQw
+      EgYDVQQDDAtFYXN5LVJTQSBDQTAeFw0yNDA2MDIwOTIyNTZaFw0yNzA1MTgwOTIy
+      NTZaMBUxEzARBgNVBAMMCnRlc3QtcmVhY3QwWTATBgcqhkjOPQIBBggqhkjOPQMB
+      BwNCAATlx42vd0RHDqnOUUsmYP63M6oMD99O22fg4c357C9HP01qhbkHYqlFYCL4
+      kvc0EYGAoLXAyffSGnfNHLWNZYNto4GiMIGfMAkGA1UdEwQCMAAwHQYDVR0OBBYE
+      FBoqK9f8gRvxc/FxfVihxNmsug88MFEGA1UdIwRKMEiAFEuWGrFo27NDQdT+fmVq
+      aY5cSMsSoRqkGDAWMRQwEgYDVQQDDAtFYXN5LVJTQSBDQYIUCpteHRgLAGRDQlq2
+      mONZdCJOvgAwEwYDVR0lBAwwCgYIKwYBBQUHAwIwCwYDVR0PBAQDAgeAMAoGCCqG
+      SM49BAMCA0kAMEYCIQDDfSaLtne4zVjn3PkqDOtJm1U5+IdwZgBpw0DisoMgCwIh
+      AO2XMD+olVgNZqX1Kk45w1LIgkqfjBW78fekjZ4mV4YY
+      -----END CERTIFICATE-----
+      </cert>
+      <key>
+      -----BEGIN PRIVATE KEY-----
+      MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgAckVE1uSGep+iIiX
+      DSLnRQxWiS6t6yM3VnO7lqQMeKGhRANCAATlx42vd0RHDqnOUUsmYP63M6oMD99O
+      22fg4c357C9HP01qhbkHYqlFYCL4kvc0EYGAoLXAyffSGnfNHLWNZYNt
+      -----END PRIVATE KEY-----
+      </key>
+      <tls-crypt>
+      #
+      # 2048 bit OpenVPN static key
+      #
+      -----BEGIN OpenVPN Static key V1-----
+      64c46af07fe06477c39b1e56adbd40f0
+      f36770a5d14f71b9b46280c291299475
+      e0108339a40a824ac7fb037cece168cc
+      5d1b78128b152396b94ac5222c475ffe
+      31b8b26412e45bbc90b4f8444f5031bd
+      804bde99a979d19546ecb475d98ddcaa
+      880fd99d332f83b52de3cc271e881752
+      a4987060c167bb520808d0763d746d5d
+      7950a65088b7f07c4addb76d92a10707
+      6bbc2d66d415d50326d52b97018bd8ba
+      c1fecef1d5b1f88123501210c3d59e61
+      688bc3c07f2647de8894975df5cc1945
+      6cf3f5cdc0a198862999f1dcaaa38925
+      dd5c5df69136dfde486ced2fa3099bfb
+      702f6dbeaacc30512ff829efebc43d4b
+      824e676785b87f9aae51ba8f7fa0cb12
+      -----END OpenVPN Static key V1-----
+      </tls-crypt>
